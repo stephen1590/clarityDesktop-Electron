@@ -13,7 +13,8 @@
         }
         
         h1,
-        h2 {
+        h2,
+        h3 {
             font-family: 'Segoe UI Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
         }
@@ -56,30 +57,28 @@
 
         <script>
             const TabGroup = require('electron-tabs')
-            let tabGroup = new TabGroup({
-                newTab: {
-                    title: 'New Tab'
-                }
-            });
+            let tabGroup = new TabGroup();
         </script>
     </div>
     <script>
         var permaToken = ""
-        document.querySelector('#submit').addEventListener('click', function(event) {
+        var taskData = null
+        document.querySelector('#submit').addEventListener('click', async function(event) {
             let username = document.getElementById("username").value;
 
             if (username.toLowerCase().includes("gdsxprod") && password != "") {
                 let password = document.getElementById("password").value;
-                if (permaToken = "") {
-                    getKey("gdsxprod\\stephen.mcdermott", "@!D1g1d3$71n3D!@", "61");
+                if (permaToken == "") {
+                    permaToken = await getKeyViaSwagger(username, password, "61");
                 }
                 if (permaToken != "")
-                    var response = tasks("gdsxprod\\stephen.mcdermott", permaToken)
+                    taskData = await tasksViaSwagger(username, permaToken)
                 event.preventDefault();
-                console.log(username);
+                //console.log(username);
                 //console.log(password);
+                buildTaskList(taskData);
                 document.getElementById("login").style = 'display:none;';
-                document.getElementById("menu").style = 'width:25%;overflow: hidden;float:left; vertical-align: top; height: 100%;';
+                document.getElementById("menu").style = 'width:25%;float:left; vertical-align: top; height: 100%;';
                 document.getElementById("tabs").style = 'width: 75%;height: 100%; float:right;';
             }
             document.getElementById("password").value = "";
@@ -88,13 +87,6 @@
     <script>
         const uri = "https://clarityapi.concurcompleat.com/swagger";
         const SwaggerClient = require("swagger-client");
-
-        async function getKey(un, pw, cu) {
-            console.log("Getting Key!");
-            const result = await getKeyViaSwagger(un, pw, cu);
-            permaToken = result;
-            console.log("Key got!");
-        }
 
         function getKeyViaSwagger(un, pw, cu) {
             return new Promise(resolve => {
@@ -116,13 +108,8 @@
                                     console.log('Oops!  failed with message: ' + error.statusText);
                                 });
                         });
-                }, 2000);
+                }, 1000);
             });
-        }
-        async function tasks(un, token) {
-            console.log("Getting Tasks!");
-            const result = await tasksViaSwagger(un, token);
-            console.log("Tasks got!");
         }
 
         function tasksViaSwagger(un, token) {
@@ -158,12 +145,34 @@
                                     console.log('Oops!  failed with message: ' + error.statusText);
                                 });
                         });
-                }, 2000);
+                }, 1000);
             });
         }
 
         function buildTaskList(tasksJson) {
             var htmlItems = "";
+            tasksJson.forEach(element => {
+                var current = "<div class='task' id='" + element["id"] + "'>";
+                //console.log(element);
+                current = current + "<h3>" + element["id"] + "</h3></div>";
+                htmlItems = htmlItems + current
+            });
+            document.getElementById("contents").innerHTML = htmlItems;
+            (document.querySelectorAll(".task")).forEach(function(node) {
+                node.addEventListener('click', function(event) {
+                    addTab(node.id);
+                })
+            });
+        }
+
+        function addTab(id) {
+            const uri = "https://support.concurcompleat.com/task/" + id
+            let tab = tabGroup.addTab({
+                title: "CT#" + id,
+                src: uri,
+                visible: true,
+                active: true
+            });
         }
     </script>
 </body>
