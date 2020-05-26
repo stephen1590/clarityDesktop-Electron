@@ -1,0 +1,19 @@
+{
+    "name": "claritydesktop-v2",
+    "version": "1.0.0",
+    "description": "Wrapper for Clarity Desktop",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron ."
+    },
+    "author": "Stephen",
+    "license": "ISC",
+    "dependencies": {
+        "@material-ui/core": "^4.10.0",
+        "@material-ui/icons": "^4.9.1",
+        "client-request": "^2.3.0",
+        "electron": "^8.3.0",
+        "electron-tabs": "^0.15.0",
+        "swagger-client": "^3.10.4"
+    }
+}

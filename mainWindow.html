@@ -1,0 +1,171 @@
+<html lang="en">
+
+<head>
+    <title>Clarity Wrapper</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="tabs.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #c6c6c6;
+        }
+        
+        h1,
+        h2 {
+            font-family: 'Segoe UI Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+        }
+        
+        #login {
+            background-color: #3c3c3c;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body style="margin:0">
+    <div id='login' style="height: 135px;vertical-align: middle; display:table;margin: auto; margin-top: 250px; padding:10px;">
+        <div style="margin: 5px;">
+            <h2>Clarity Desktop Login</h2>
+            <label style="margin-right: 5px;">Username  </label>
+            <input style="float:right;" id="username" type="text" placeholder="GDSXProd\User.Name" name="username" required/>
+        </div>
+        <div style="margin: 5px;">
+            <label style="margin-right: 5px;">Password</label>
+            <input style="float:right;" id="password" type="password" placeholder="Enter Password" name="password" required/>
+        </div>
+        <div style="margin: 5px;">
+            <button style="float:right;" id='submit'>Login</button>
+        </div>
+    </div>
+    <div id='menu' style='display:none;'>
+        <div id='closedMenu'> </div>
+        <div id='openedMenu' style="padding-left:20px;">
+            <h1>Clarity tasks:</h1>
+            <div id="contents">Filler-Text</div>
+        </div>
+    </div>
+    <div id='tabs' style='display:none;'>
+        <div class="etabs-tabgroup">
+            <div class="etabs-tabs"></div>
+            <div class="etabs-buttons"></div>
+        </div>
+        <div class="etabs-views"></div>
+
+        <script>
+            const TabGroup = require('electron-tabs')
+            let tabGroup = new TabGroup({
+                newTab: {
+                    title: 'New Tab'
+                }
+            });
+        </script>
+    </div>
+    <script>
+        var permaToken = ""
+        document.querySelector('#submit').addEventListener('click', function(event) {
+            let username = document.getElementById("username").value;
+
+            if (username.toLowerCase().includes("gdsxprod") && password != "") {
+                let password = document.getElementById("password").value;
+                if (permaToken = "") {
+                    getKey("gdsxprod\\stephen.mcdermott", "@!D1g1d3$71n3D!@", "61");
+                }
+                if (permaToken != "")
+                    var response = tasks("gdsxprod\\stephen.mcdermott", permaToken)
+                event.preventDefault();
+                console.log(username);
+                //console.log(password);
+                document.getElementById("login").style = 'display:none;';
+                document.getElementById("menu").style = 'width:25%;overflow: hidden;float:left; vertical-align: top; height: 100%;';
+                document.getElementById("tabs").style = 'width: 75%;height: 100%; float:right;';
+            }
+            document.getElementById("password").value = "";
+        });
+    </script>
+    <script>
+        const uri = "https://clarityapi.concurcompleat.com/swagger";
+        const SwaggerClient = require("swagger-client");
+
+        async function getKey(un, pw, cu) {
+            console.log("Getting Key!");
+            const result = await getKeyViaSwagger(un, pw, cu);
+            permaToken = result;
+            console.log("Key got!");
+        }
+
+        function getKeyViaSwagger(un, pw, cu) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    new SwaggerClient({
+                            url: uri,
+                            usePromise: true
+                        })
+                        .then(function(client) {
+                            client.apis.default.login({
+                                    user: un,
+                                    pass: pw,
+                                    cust: cu
+                                })
+                                .then(function(login) {
+                                    resolve(login.body["Token"]);
+                                })
+                                .catch(function(error) {
+                                    console.log('Oops!  failed with message: ' + error.statusText);
+                                });
+                        });
+                }, 2000);
+            });
+        }
+        async function tasks(un, token) {
+            console.log("Getting Tasks!");
+            const result = await tasksViaSwagger(un, token);
+            console.log("Tasks got!");
+        }
+
+        function tasksViaSwagger(un, token) {
+            var un = un.split("\\")[1];
+            token = "Bearer " + token
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    new SwaggerClient({
+                            url: uri,
+                            usePromise: true,
+                            authorizations: {
+                                clarity_auth: token
+                            }
+                        })
+                        .then(function(client) {
+                            client.apis.default.getTasks({
+                                    assignee: [
+                                        un
+                                    ],
+                                    status: [
+                                        "1",
+                                        "2",
+                                        "3",
+                                        "4",
+                                        "5",
+                                        "6"
+                                    ]
+                                }, )
+                                .then(function(tasks) {
+                                    resolve(tasks.body);
+                                })
+                                .catch(function(error) {
+                                    console.log('Oops!  failed with message: ' + error.statusText);
+                                });
+                        });
+                }, 2000);
+            });
+        }
+
+        function buildTaskList(tasksJson) {
+            var htmlItems = "";
+        }
+    </script>
+</body>
+
+</html>
