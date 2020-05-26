@@ -16,7 +16,19 @@
         h2,
         h3 {
             font-family: 'Segoe UI Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        h3 {
             text-align: center;
+            margin: 0px;
+        }
+        
+        .task {
+            padding: 10px 0;
+        }
+        
+        .task:hover {
+            background-color: #3c3c3c;
         }
         
         #login {
@@ -65,19 +77,18 @@
         var taskData = null
         document.querySelector('#submit').addEventListener('click', async function(event) {
             let username = document.getElementById("username").value;
-
+            document.getElementById("login").style = 'display:none;';
             if (username.toLowerCase().includes("gdsxprod") && password != "") {
                 let password = document.getElementById("password").value;
                 if (permaToken == "") {
                     permaToken = await getKeyViaSwagger(username, password, "61");
+                    permaToken = "Bearer " + permaToken;
                 }
-                if (permaToken != "")
-                    taskData = await tasksViaSwagger(username, permaToken)
+                if (permaToken != "") {
+                    taskData = await tasksViaSwagger(username.split("\\")[1], permaToken)
+                }
                 event.preventDefault();
-                //console.log(username);
-                //console.log(password);
-                buildTaskList(taskData);
-                document.getElementById("login").style = 'display:none;';
+                buildTaskList(taskData, permaToken);
                 document.getElementById("menu").style = 'width:25%;float:left; vertical-align: top; height: 100%;';
                 document.getElementById("tabs").style = 'width: 75%;height: 100%; float:right;';
             }
@@ -113,8 +124,6 @@
         }
 
         function tasksViaSwagger(un, token) {
-            var un = un.split("\\")[1];
-            token = "Bearer " + token
             return new Promise(resolve => {
                 setTimeout(() => {
                     new SwaggerClient({
@@ -149,7 +158,8 @@
             });
         }
 
-        function buildTaskList(tasksJson) {
+        function buildTaskList(tasksJson, token) {
+            const uri = "https://support.concurcompleat.com/task/";
             var htmlItems = "";
             tasksJson.forEach(element => {
                 var current = "<div class='task' id='" + element["id"] + "'>";
@@ -160,19 +170,25 @@
             document.getElementById("contents").innerHTML = htmlItems;
             (document.querySelectorAll(".task")).forEach(function(node) {
                 node.addEventListener('click', function(event) {
-                    addTab(node.id);
+                    addTab(uri, node.id, token);
                 })
             });
         }
 
-        function addTab(id) {
-            const uri = "https://support.concurcompleat.com/task/" + id
-            let tab = tabGroup.addTab({
+        function addTab(uri, id, token) {
+            uri = uri + id
+            var options = {
                 title: "CT#" + id,
                 src: uri,
                 visible: true,
                 active: true
-            });
+            }
+            if (tabGroup.tabs.length == 0) {
+                options.webviewAttributes = {
+                    extraHeaders: "Authorization: " + token
+                }
+            }
+            let tab = tabGroup.addTab(options);
         }
     </script>
 </body>
