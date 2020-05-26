@@ -18,13 +18,19 @@
             font-family: 'Segoe UI Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
+        h2,
         h3 {
             text-align: center;
+        }
+        
+        h3 {
             margin: 0px;
         }
         
         .task {
             padding: 10px 0;
+            text-overflow: ellipsis;
+            overflow: hidden;
         }
         
         .task:hover {
@@ -39,7 +45,7 @@
 </head>
 
 <body style="margin:0">
-    <div id='login' style="height: 135px;vertical-align: middle; display:table;margin: auto; margin-top: 250px; padding:10px;">
+    <div id='login' style="width: 275px; height: 135px;vertical-align: middle; display:table;margin: auto; margin-top: 250px; padding:10px;">
         <div style="margin: 5px;">
             <h2>Clarity Desktop Login</h2>
             <label style="margin-right: 5px;">Username  </label>
@@ -77,9 +83,10 @@
         var taskData = null
         document.querySelector('#submit').addEventListener('click', async function(event) {
             let username = document.getElementById("username").value;
-            document.getElementById("login").style = 'display:none;';
             if (username.toLowerCase().includes("gdsxprod") && password != "") {
                 let password = document.getElementById("password").value;
+                document.getElementById("login").innerHTML = "<h2>Loading...</h2>"
+
                 if (permaToken == "") {
                     permaToken = await getKeyViaSwagger(username, password, "61");
                     permaToken = "Bearer " + permaToken;
@@ -87,12 +94,12 @@
                 if (permaToken != "") {
                     taskData = await tasksViaSwagger(username.split("\\")[1], permaToken)
                 }
+                document.getElementById("login").style = 'display:none;';
                 event.preventDefault();
                 buildTaskList(taskData, permaToken);
-                document.getElementById("menu").style = 'width:25%;float:left; vertical-align: top; height: 100%;';
+                document.getElementById("menu").style = 'overflow;hidden;width:25%;float:left; vertical-align: top; height: 100%;';
                 document.getElementById("tabs").style = 'width: 75%;height: 100%; float:right;';
             }
-            document.getElementById("password").value = "";
         });
     </script>
     <script>
@@ -164,10 +171,12 @@
             tasksJson.forEach(element => {
                 var current = "<div class='task' id='" + element["id"] + "'>";
                 //console.log(element);
-                current = current + "<h3>" + element["id"] + "</h3></div>";
+                current = current + "<span style='white-space: nowrap;'><h3 style='display:inline-block;'>CT#" + element["id"] + "</h3>";
+                current = current + " - " + element["title"] + "</span></div>";
                 htmlItems = htmlItems + current
             });
             document.getElementById("contents").innerHTML = htmlItems;
+            //Now Assign our Events!
             (document.querySelectorAll(".task")).forEach(function(node) {
                 node.addEventListener('click', function(event) {
                     addTab(uri, node.id, token);
