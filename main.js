@@ -19,13 +19,14 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1680,
         height: 1200,
-        frame: false,
+        frame: true,
         backgroundColor: '#1e1e1e',
         webPreferences: {
             nodeIntegration: true,
             webviewTag: true
         }
     });
+    //mainWindow.setMenu(null);
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'mainWindow.html'),
         protocol: 'file:',
