@@ -28,18 +28,32 @@
         }
         
         .task {
-            padding: 10px 0;
+            padding: 10px;
             text-overflow: ellipsis;
             overflow: hidden;
+            border-bottom: 1px solid #818384;
         }
         
         .task:hover {
             background-color: #3c3c3c;
+            cursor: pointer;
         }
         
         #login {
             background-color: #3c3c3c;
             border-radius: 15px;
+        }
+        
+        #allLink {
+            text-align: right;
+        }
+        
+        #allLink:hover {
+            cursor: pointer;
+        }
+        
+        #refresh:hover {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -60,9 +74,11 @@
         </div>
     </div>
     <div id='menu' style='display:none;'>
-        <div id='closedMenu'> </div>
+        <div style="height: 80px;background: #000; color:white;">
+            <h1 style="padding-left: 20px; margin: 0;">Clarity tasks: </h1>
+            <span id='allLink' style="padding-left: 20px;">(all)</span><span id="refresh" style="float: right;padding-right:  10px;">↺</span>
+        </div>
         <div id='openedMenu' style="padding-left:20px;">
-            <h1>Clarity tasks:</h1>
             <div id="contents">Filler-Text</div>
         </div>
     </div>
@@ -94,9 +110,13 @@
                 if (permaToken != "") {
                     taskData = await tasksViaSwagger(username.split("\\")[1], permaToken)
                 }
-                document.getElementById("login").style = 'display:none;';
+
+                allTasks(username, permaToken)
+
+                buildTaskList(taskData, permaToken, username);
+
                 event.preventDefault();
-                buildTaskList(taskData, permaToken);
+                document.getElementById("login").style = 'display:none;';
                 document.getElementById("menu").style = 'overflow;hidden;width:25%;float:left; vertical-align: top; height: 100%;';
                 document.getElementById("tabs").style = 'width: 75%;height: 100%; float:right;';
             }
@@ -165,7 +185,7 @@
             });
         }
 
-        function buildTaskList(tasksJson, token) {
+        function buildTaskList(tasksJson, token, un) {
             const uri = "https://support.concurcompleat.com/task/";
             var htmlItems = "";
             tasksJson.forEach(element => {
@@ -180,24 +200,42 @@
             (document.querySelectorAll(".task")).forEach(function(node) {
                 node.addEventListener('click', function(event) {
                     addTab(uri, node.id, token);
-                })
+                });
+            });
+            document.getElementById("allLink").addEventListener('click', function(event) {
+                allTasks(un, token)
+            });
+            document.getElementById("refresh").addEventListener('click', async function(event) {
+                tasksJson = await tasksViaSwagger(un.split("\\")[1], token)
+                buildTaskList(tasksJson, token, un)
             });
         }
 
         function addTab(uri, id, token) {
-            uri = uri + id
+            var titleText = ""
+            if (id == "") {
+                titleText = "Task List";
+            } else {
+                uri = uri + id
+                titleText = "CT#" + id;
+            }
             var options = {
-                title: "CT#" + id,
+                title: titleText,
                 src: uri,
                 visible: true,
                 active: true
             }
             if (tabGroup.tabs.length == 0) {
+                var xtra = "authorization: " + token
                 options.webviewAttributes = {
-                    extraHeaders: "Authorization: " + token
+                    extraHeaders: xtra
                 }
             }
             let tab = tabGroup.addTab(options);
+        }
+
+        function allTasks(username, token) {
+            addTab("https://support.concurcompleat.com/tasklist?assignee=" + username.split("\\")[1] + "&status=1,2,3,4,5,6", "", token)
         }
     </script>
 </body>

@@ -17,9 +17,9 @@ function createWindow() {
     //Create new window
     //var password = getInput();
     mainWindow = new BrowserWindow({
-        width: 1280,
-        height: 800,
-        frame: true,
+        width: 1680,
+        height: 1200,
+        frame: false,
         backgroundColor: '#1e1e1e',
         webPreferences: {
             nodeIntegration: true,
