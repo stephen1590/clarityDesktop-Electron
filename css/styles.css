@@ -1,0 +1,97 @@
+/* width */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+
+/* Track */
+
+ ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+
+/* Handle */
+
+ ::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+
+/* Handle on hover */
+
+ ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #c6c6c6;
+    overflow: hidden;
+    height: 100%;
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Segoe UI Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h2,
+h3 {
+    text-align: center;
+}
+
+h3 {
+    margin: 0px;
+}
+
+.task {
+    padding: 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    border-bottom: 1px solid #818384;
+}
+
+.task:hover {
+    background-color: #3c3c3c;
+    cursor: pointer;
+}
+
+.taskHeader {
+    background-color: #c3c3c3;
+    padding: 10px 0;
+    color: #000;
+    padding-left: 10px;
+}
+
+#login {
+    background-color: #3c3c3c;
+    border-radius: 15px;
+}
+
+#error {
+    background-color: #3c3c3c;
+    border-radius: 15px;
+    margin: 0 auto;
+    margin-top: 20px;
+    text-align: center;
+}
+
+#allLink {
+    text-align: right;
+}
+
+#allLink:hover {
+    cursor: pointer;
+}
+
+#refresh:hover {
+    cursor: pointer;
+}
+
+#assigned,
+#owned {
+    padding-top: 10px;
+}

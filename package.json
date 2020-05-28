@@ -7,13 +7,11 @@
         "start": "electron ."
     },
     "author": "Stephen",
-    "license": "ISC",
+    "license": "MIT",
     "dependencies": {
-        "@material-ui/core": "^4.10.0",
-        "@material-ui/icons": "^4.9.1",
-        "client-request": "^2.3.0",
+        "dialog": "^0.3.1",
         "electron": "^8.3.0",
         "electron-tabs": "^0.15.0",
-        "swagger-client": "^3.10.4"
+        "swagger-client": "^3.10.5"
     }
 }
