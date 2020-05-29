@@ -8,7 +8,7 @@ const path = require('path');
 const { app, BrowserWindow } = electron;
 
 const Tray = electron.Tray
-const iconPath = path.join(__dirname, '/img/SAPConcur.png')
+const iconPath = path.join(__dirname, './img/SAPConcur.png')
 const Menu = electron.Menu
 
 let mainWindow;
@@ -26,6 +26,7 @@ function createWindow() {
         height: 1200,
         frame: true,
         backgroundColor: '#1e1e1e',
+        icon: iconPath,
         webPreferences: {
             nodeIntegration: true,
             webviewTag: true
@@ -46,7 +47,7 @@ function createWindow() {
 
     //mainWindow.setMenu(null);
     mainWindow.loadURL(url.format({
-        pathname: path.join(__dirname, 'mainWindow.html'),
+        pathname: path.join(__dirname, './mainWindow.html'),
         protocol: 'file:',
         slashes: true
     }));
@@ -61,7 +62,7 @@ function createWindow() {
     })
 
     let template = [{
-        label: 'Quit',
+        label: 'Quit Application',
         click: function() {
             app.isQuiting = true;
             app.quit();

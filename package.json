@@ -1,17 +1,47 @@
 {
-    "name": "claritydesktop-v2",
+    "name": "clarity_web_wrapper",
     "version": "1.0.0",
-    "description": "Wrapper for Clarity Desktop",
+    "description": "Clarity Web Wrapper for desktop",
     "main": "main.js",
     "scripts": {
-        "start": "electron ."
+        "start": "electron .",
+        "pack": "electron-builder --dir",
+        "dist": "electron-builder"
     },
     "author": "Stephen",
     "license": "MIT",
     "dependencies": {
         "dialog": "^0.3.1",
-        "electron": "^8.3.0",
         "electron-tabs": "^0.15.0",
         "swagger-client": "^3.10.5"
+    },
+    "devDependencies": {
+        "dialog": "^0.3.1",
+        "electron": "^8.3.0",
+        "electron-builder": "^22.7.0",
+        "electron-tabs": "^0.15.0",
+        "swagger-client": "^3.10.5"
+    },
+    "build": {
+        "appId": "com.clarity.web.wrapper",
+        "mac": {
+            "category": "website.wrapper"
+        },
+        "win": {
+            "icon": "./buildResources/icon.png"
+        },
+        "files": [
+            "./css/*",
+            "./img/*",
+            "./node_modules/**/*",
+            "./js/*",
+            "*.js",
+            "*.html",
+            "*.css",
+            "*.png"
+        ],
+        "directories": {
+            "buildResources": "img"
+        }
     }
 }
