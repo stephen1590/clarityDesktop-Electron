@@ -54,18 +54,18 @@
         </script>
     </div>
     <script>
-        var permaToken = "";
-        var response = "";
-        var taskData = {
-            "Assigned": "",
-            "Owned": ""
-        }
         document.getElementById("form").addEventListener('submit', event => {
             event.preventDefault();
             document.getElementById("error").style = "display:none;"
             setup(event)
         });
         async function setup(event) {
+            var permaToken = "";
+            var response = "";
+            var taskData = {
+                "Assigned": "",
+                "Owned": ""
+            }
             let username = document.getElementById("username").value;
             if (username.toLowerCase().includes("gdsxprod") && password != "") {
                 let password = document.getElementById("password").value;
@@ -90,18 +90,12 @@
                                 document.getElementById("tabs").style = 'width: 80%;height: 100%; float:right;';
                             } else {
                                 error("Error getting task Data. Refresh.")
-                                document.getElementById("form").style = 'display:block;';
-                                document.getElementById("loading").style = 'display:none;';
                             }
                         } else {
                             error("Error getting task Data. Refresh.")
-                            document.getElementById("form").style = 'display:block;';
-                            document.getElementById("loading").style = 'display:none;';
                         }
                     } else {
                         error("Error logging in. Try again.")
-                        document.getElementById("form").style = 'display:block;';
-                        document.getElementById("loading").style = 'display:none;';
                     }
                 }
             } else {
@@ -110,6 +104,8 @@
         }
 
         function error(error) {
+            document.getElementById("form").style = 'display:block;';
+            document.getElementById("loading").style = 'display:none;';
             document.getElementById("error").innerHTML = "<p style='color:red;'>" + error + "</p>"
             document.getElementById("error").style = "display:block; width: 275px; vertical-align: middle; display:table; padding:10px;"
         }
