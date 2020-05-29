@@ -17,6 +17,10 @@ let tray = null;
 //Listen for app to be ready
 
 function createWindow() {
+
+    //--------------------------------------------------
+    // Main Window
+    //--------------------------------------------------
     mainWindow = new BrowserWindow({
         width: 1680,
         height: 1200,
@@ -28,6 +32,9 @@ function createWindow() {
         }
     });
 
+    //--------------------------------------------------
+    // Prevent closing from quitting - do it from the system tray
+    //--------------------------------------------------
     mainWindow.on('close', function(event) {
         if (!app.isQuiting) {
             event.preventDefault();
