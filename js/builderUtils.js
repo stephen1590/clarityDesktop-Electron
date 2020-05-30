@@ -1,45 +1,42 @@
-async function setup(event) {
-    var permaToken = "";
+async function setupLayout(key, username) {
+    var keyHeader = ""
     var response = "";
     var taskData = {
         "Assigned": "",
         "Owned": ""
     }
-    let username = document.getElementById("username").value;
     if (username.toLowerCase().includes("gdsxprod") && password != "") {
-        let password = document.getElementById("password").value;
-        document.getElementById("form").style = 'display:none;';
-        document.getElementById("loading").style = 'display:block;';
-        if (permaToken == "") {
-            response = await getKeyViaSwagger(username, password, "61");
+        document.getElementById("loading").style = 'margin: auto; padding-top: 150px;';
+        if (key != "") {
+            keyHeader = "Bearer " + key;
+            console.log("Using API key: " + keyHeader)
+            response = await assignedTasksViaSwagger(username.split("\\")[1], keyHeader)
             if (response != "Error" && response != "") {
-                permaToken = "Bearer " + response;
-                response = await assignedTasksViaSwagger(username.split("\\")[1], permaToken)
+                taskData.Assigned = response;
+                response = await ownedTasksViaSwagger(username.split("\\")[1], keyHeader)
                 if (response != "Error" && response != "") {
-                    taskData.Assigned = response;
-                    response = await ownedTasksViaSwagger(username.split("\\")[1], permaToken)
-                    if (response != "Error" && response != "") {
-                        taskData.Owned = response;
-                        allTasks(username, permaToken)
+                    taskData.Owned = response;
+                    newTask(keyHeader)
 
-                        buildTaskList(taskData, permaToken, username);
+                    buildTaskList(taskData, keyHeader, username);
 
-                        document.getElementById("login").style = 'display:none;';
-                        document.getElementById("menu").style = 'height:100%;width:20%;float:left; vertical-align: top; height: 100%;';
-                        document.getElementById("tabs").style = 'width: 80%;height: 100%; float:right;';
-                    } else {
-                        error("Error getting task Data. Refresh.")
-                    }
+                    document.getElementById("loading").style = 'display:none;';
+                    document.getElementById("menu").style = 'height:100%;width:20%;float:left; vertical-align: top; height: 100%;';
+                    document.getElementById("tabs").style = 'width: 80%;height: 100%; float:right;';
                 } else {
-                    error("Error getting task Data. Refresh.")
+                    error("Error getting task Data. Refresh.");
+                    return "Error getting task Data. Refresh.";
                 }
             } else {
-                error("Error logging in. Try again.")
+                error("Error getting task Data. Refresh.");
+                return "Error getting task Data. Refresh.";
             }
         }
     } else {
         error("Format GDSXProd username.")
+        return "Format GDSXProd username.";
     }
+    return "done";
 }
 
 function error(error) {
@@ -50,7 +47,7 @@ function error(error) {
 }
 
 function buildTaskList(tasksJson, token, un) {
-
+    const taskuri = "https://support.concurcompleat.com/task/"
     var htmlItems = "";
     var keys = Object.keys(tasksJson)
     keys.forEach(type => {
@@ -68,11 +65,11 @@ function buildTaskList(tasksJson, token, un) {
     //Now Assign our Events!
     (document.querySelectorAll(".task")).forEach(function(node) {
         node.addEventListener('click', function(event) {
-            addTab(taskuri, node.id, token);
+            addNewTab(taskuri, node.id, token);
         });
     });
     document.getElementById("allLink").addEventListener('click', function(event) {
-        allTasks(un, token)
+        newTask(token)
     });
     document.getElementById("refresh").addEventListener('click', async function(event) {
         var temp = await assignedTasksViaSwagger(un.split("\\")[1], token)
@@ -85,30 +82,32 @@ function buildTaskList(tasksJson, token, un) {
     });
 }
 
-function addTab(uriparam, id, token) {
+function addNewTab(uriparam, id, token) {
     var titleText = ""
     if (id == "") {
-        titleText = "Task List";
+        titleText = "New Task";
     } else {
         uriparam = uriparam + id
         titleText = "CT#" + id;
     }
     var options = {
-        title: titleText,
-        src: uriparam,
-        visible: true,
-        active: true
-    }
-    if (tabGroup.tabs.length == 0) {
-        var xtra = "APIToken: " + token
-        options.webviewAttributes = {
+            title: titleText,
+            src: uriparam,
+            visible: true,
+            active: true,
+            nodeintegration: true
+        }
+        //if (clarityTabs.tabs.length == 0) {
+    var xtra = "authorization: " + token
+    options.webviewAttributes = {
             extraHeaders: xtra
         }
-    }
-    let tab = tabGroup.addTab(options);
+        //}
+    let tab = clarityTabs.addTab(options);
+    //console.log(tab);
 }
 
-function allTasks(username, token) {
-    addTab("https://support.concurcompleat.com/tasklist?assignee=" + username.split("\\")[1] + "&status=1,2,3,4,5,6", "", token)
-    addTab("https://support.concurcompleat.com/tasklist?owner=" + username.split("\\")[1] + "&status=1,2,3,4,5,6", "", token)
+function newTask(token) {
+    addNewTab("https://support.concurcompleat.com/task/", "", token)
+        //addNewTab("https://google.com", "", token)
 }

@@ -9,10 +9,36 @@
     <link rel="stylesheet" href="css/styles.css">
     <script type="text/javascript" src='js/swaggerUtils.js'></script>
     <script type="text/javascript" src='js/builderUtils.js'></script>
+    <script>
+        const ipcRenderer = require('electron').ipcRenderer;
+        const ipcMain = require('electron').ipcMain;
+        var ipc_key = "";
+        var ipc_refreshKey = "";
+        var ipc_username = "";
+        var results = ""
+        ipcRenderer.on('login-data', async function(event, data) {
+            /*setTimeout(() => {
+                console.log(data["apiKey"]);
+                console.log(data["refreshKey"]);
+                console.log(data["username"]);
+            }, 2000);*/
+            ipc_key = data["apiKey"].substring(data["apiKey"].indexOf("=") + 1, data["apiKey"].indexOf(";"))
+            ipc_refreshKey = data["refreshKey"].substring(data["refreshKey"].indexOf("=") + 1, data["refreshKey"].indexOf(";"))
+            ipc_username = data["username"];
+            results = setupLayout(ipc_key, ipc_username);
+            console.log("This should have loaded by now.");
+        });
+        document.addEventListener('DOMContentLoaded', function(event) {
+            //Let's trigger our call to the main thread
+            var results = ipcRenderer.sendSync('get-Login-Data', 'now');
+        });
+    </script>
 </head>
 
 <body style="margin:0">
-    <div id='login' style="width: 275px; height: 135px;vertical-align: middle; display:table;margin: auto; margin-top: 250px; padding:10px;">
+
+    <!--//Setupv2 Disabled login display:none;-->
+    <div id='login' style="display:none; width: 275px; height: 135px;vertical-align: middle; margin: auto; margin-top: 250px; padding:10px;">
         <form id="form">
             <div style="margin: 5px;">
                 <h2>Clarity Desktop Login</h2>
@@ -27,16 +53,17 @@
                 <button style="float:right;" type='submit' id='submit' value='submit'>Login</button>
             </div>
         </form>
-        <div id='loading' style='display:none;'>
-            <h2>Loading...</h2>
-            <div class="loader"></div>
-        </div>
+
+    </div>
+    <div id='loading' style="margin: auto; padding-top: 150px;">
+        <h2>Loading...</h2>
+        <div class="loader"></div>
     </div>
     <div id='error' style="display:none;"></div>
     <div id='menu' style='display:none;'>
         <div style="height: 80px;background: #000; color:white;">
             <h1 style="padding-left: 20px; margin: 0;">Clarity tasks: </h1>
-            <span id='allLink' style="padding-left: 20px;">(all)</span><span id="refresh" style="float: right;padding-right:  10px;">↺</span>
+            <span id='allLink' style="padding-left: 20px;">(New Task)</span><span id="refresh" style="float: right;padding-right:  10px;">↺</span>
         </div>
         <div id='openedMenu' style="padding-left:20px;height:100%;overflow:scroll;">
             <div id="contents" style="padding-bottom:80px;">Filler-Text</div>
@@ -48,19 +75,11 @@
             <div class="etabs-buttons"></div>
         </div>
         <div class="etabs-views"></div>
-
         <script>
-            const TabGroup = require('electron-tabs')
-            let tabGroup = new TabGroup();
+            const TabGroup = require('electron-tabs');
+            let clarityTabs = new TabGroup();
         </script>
     </div>
-    <script>
-        document.getElementById("form").addEventListener('submit', event => {
-            event.preventDefault();
-            document.getElementById("error").style = "display:none;"
-            setup(event)
-        });
-    </script>
 </body>
 
 </html>
