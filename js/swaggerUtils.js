@@ -1,5 +1,4 @@
 const swaggeruri = "https://clarityapi.concurcompleat.com/swagger";
-const taskuri = "https://support.concurcompleat.com/task/";
 const SwaggerClient = require("swagger-client");
 
 function getKeyViaSwagger(un, pw, cu) {

@@ -1,3 +1,7 @@
+const taskuri = "https://support.concurcompleat.com/task/"
+const Store = require('electron-store');
+const store = new Store();
+
 async function setupLayout(key, username) {
     var keyHeader = ""
     var response = "";
@@ -16,12 +20,22 @@ async function setupLayout(key, username) {
                 response = await ownedTasksViaSwagger(username.split("\\")[1], keyHeader)
                 if (response != "Error" && response != "") {
                     taskData.Owned = response;
-                    newTask(keyHeader)
+
+                    try {
+                        var list = store.get('tabOrder');
+                        list.forEach(item => {
+                            addNewTab(taskuri, item, keyHeader);
+                        });
+                    } catch (e) {
+                        console.log(e);
+                        addNewTab(taskuri, "NewTask", keyHeader)
+                    }
+
 
                     buildTaskList(taskData, keyHeader, username);
 
                     document.getElementById("loading").style = 'display:none;';
-                    document.getElementById("menu").style = 'height:100%;width:20%;float:left; vertical-align: top; height: 100%;';
+                    document.getElementById("menu").style = 'height:100%;width:20%;float:left; vertical-align: top;';
                     document.getElementById("tabs").style = 'width: 80%;height: 100%; float:right;';
                 } else {
                     error("Error getting task Data. Refresh.");
@@ -47,7 +61,6 @@ function error(error) {
 }
 
 function buildTaskList(tasksJson, token, un) {
-    const taskuri = "https://support.concurcompleat.com/task/"
     var htmlItems = "";
     var keys = Object.keys(tasksJson)
     keys.forEach(type => {
@@ -69,7 +82,7 @@ function buildTaskList(tasksJson, token, un) {
         });
     });
     document.getElementById("allLink").addEventListener('click', function(event) {
-        newTask(token)
+        addNewTab(taskuri, "NewTask", token)
     });
     document.getElementById("refresh").addEventListener('click', async function(event) {
         var temp = await assignedTasksViaSwagger(un.split("\\")[1], token)
@@ -82,32 +95,57 @@ function buildTaskList(tasksJson, token, un) {
     });
 }
 
-function addNewTab(uriparam, id, token) {
-    var titleText = ""
-    if (id == "") {
-        titleText = "New Task";
-    } else {
-        uriparam = uriparam + id
-        titleText = "CT#" + id;
-    }
-    var options = {
+function addNewTab(uriparam, taskID, token) {
+    var existingTab = getTabID(taskID)
+    if (existingTab == -1) {
+        //Add New Tab
+        var titleText = ""
+        if (taskID == "NewTask") {
+            titleText = "New Task";
+        } else {
+            uriparam = uriparam + taskID
+            titleText = "CT#" + taskID;
+        }
+        var options = {
             title: titleText,
             src: uriparam,
             visible: true,
             active: true,
-            nodeintegration: true
+            nodeintegration: true,
         }
-        //if (clarityTabs.tabs.length == 0) {
-    var xtra = "authorization: " + token
-    options.webviewAttributes = {
-            extraHeaders: xtra
+
+        var xtra = "authorization: " + token
+        options.webviewAttributes = {
+            extraHeaders: xtra,
+            "data-flag": taskID
         }
-        //}
-    let tab = clarityTabs.addTab(options);
-    //console.log(tab);
+        let tab = clarityTabs.addTab(options);
+    } else {
+        clarityTabs.getTab(existingTab).activate();
+        clarityTabs.getTab(existingTab).webview.reload();
+        //console.log("Tab exists");
+    }
+    storeTabs();
 }
 
-function newTask(token) {
-    addNewTab("https://support.concurcompleat.com/task/", "", token)
-        //addNewTab("https://google.com", "", token)
+function storeTabs() {
+    var list = [];
+
+    clarityTabs.tabs.forEach(element => {
+        list.push(element.webviewAttributes["data-flag"]);
+
+    });
+    store.set('tabOrder', list);
+}
+
+function getTabID(find) {
+    var retVal = -1;
+    for (var element of clarityTabs.tabs) {
+        if (element.webviewAttributes["data-flag"] == find) {
+            //console.log(element.webviewAttributes["data-flag"])
+            retVal = element.id
+            break;
+        }
+    }
+    return retVal;
 }

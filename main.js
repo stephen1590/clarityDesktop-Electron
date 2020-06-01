@@ -6,17 +6,22 @@ const url = require('url');
 const path = require('path');
 
 const { app, BrowserWindow } = electron;
+const session = electron.session
 
 const Tray = electron.Tray
-const iconPath = path.join(__dirname, './img/SAPConcur.png')
+const iconPath = path.join(__dirname, './img/clarity.png')
 const Menu = electron.Menu
 const ipcMain = electron.ipcMain
+
+const Store = require('electron-store');
+const store = new Store();
 
 let mainWindow;
 let loginWindow;
 let loadingWindow;
 let okayToKill = true;
 let tray = null;
+let cookieString = ""
 
 let loginName = null; //"gdsxprod\\stephen.mcdermott";
 
@@ -66,6 +71,13 @@ function createMainWindow() {
 
     mainWindow.webContents.once('dom-ready', () => {
         mainWindow.webContents.openDevTools();
+        mainWindow.webContents.session.cookies.get({})
+            .then((cookies) => {
+                store.set('cookies', cookies);
+                //console.log(store.get('cookies'))
+            }).catch((error) => {
+                console.log(error)
+            });
     });
 
     //Wait for the page to tell us it's ready!
@@ -116,6 +128,7 @@ function createLoginWindow() {
 
         }
     });
+
     loginWindow.setMenu(null);
     loginWindow.webContents.loadURL("https://support.concurcompleat.com");
 
@@ -133,6 +146,7 @@ function createLoginWindow() {
     }
     loginWindow.webContents.session.webRequest.onHeadersReceived(filter, (details, callback) => {
         if (details.responseHeaders['Set-Cookie']) {
+            //console.log(details.responseHeaders)
             //console.log(details.responseHeaders['Set-Cookie'][0]);
             if ((details.responseHeaders['Set-Cookie'][0]).includes("ClarityAPIAccess=")) {
                 //console.log(details.responseHeaders['Set-Cookie'][0]);
@@ -140,14 +154,14 @@ function createLoginWindow() {
                 //console.log(details.responseHeaders['Set-Cookie'][1]);
                 refreshKey = (details.responseHeaders['Set-Cookie'][1]);
             }
+        }
+        if (apiKey != null & refreshKey != null & okayToKill) {
+            console.log("We have cookies. Okay to launch.")
+            okayToKill = false;
+            loginWindow.hide()
+            createMainWindow();
 
-            if (apiKey != null & refreshKey != null & okayToKill) {
-                okayToKill = false;
-                loginWindow.hide()
-                createMainWindow();
-                loginWindow.destroy();
-            }
-
+            loginWindow.destroy();
         }
         callback({})
     });
@@ -166,6 +180,24 @@ function createLoginWindow() {
         callback({})
     });
 
+    //Cookie/Session saving 
+    /*loginWindow.webContents.session.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+        if (cookieString = "") {
+            var cookiesList = store.get("cookies");
+
+            cookiesList.forEach(element => { //|| element['name'].indexOf("ASP.NET_SessionId") > -1
+                if (element['name'].indexOf("ClarityAPI") != -1) {
+                    element['url'] = 'https://support.concurcompleat.com';
+                    element['expirationDate'] = 0;
+                    cookieString = cookieString + element['name'] + "=" + element["value"] + ";"
+                }
+            });
+        }
+        details.requestHeaders['Cookie'] = cookieString
+        console.log("Setting coookies.");
+        callback({ requestHeaders: details.requestHeaders })
+    });*/
+
     //--------------------------------------------------
     // Closing
     //--------------------------------------------------
@@ -178,6 +210,7 @@ function createLoginWindow() {
         }
     });
 }
+
 
 app.commandLine.appendSwitch("disable-http-cache");
 app.whenReady().then(createLoginWindow)
